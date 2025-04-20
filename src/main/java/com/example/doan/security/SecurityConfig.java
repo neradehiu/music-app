@@ -31,23 +31,26 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ Allow access to static frontend files
+                        // ✅ Allow public access to static files and root
                         .requestMatchers(
                                 "/", "/index.html", "/favicon.ico",
                                 "/static/**", "/assets/**", "/css/**", "/js/**", "/images/**"
                         ).permitAll()
 
-                        // ✅ Allow access to auth endpoints
+                        // ✅ Allow auth endpoints
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // ✅ Role-based access for song-related APIs
+                        // ✅ Allow OPTIONS requests (for CORS preflight)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // ✅ Song-related APIs
                         .requestMatchers("/api/songs/favorites", "/api/songs/{id}/favorite").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/songs", "/api/songs/{id}", "/api/songs/{id}/play", "/api/songs/search", "/api/songs/genre/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/songs/upload").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/songs/{id}").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/songs/{id}").hasAuthority("ROLE_ADMIN")
 
-                        // ✅ All other requests must be authenticated
+                        // ✅ Any other API must be authenticated
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -69,7 +72,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://music-app.onrender.com")); // hoặc "*"
+        configuration.setAllowedOrigins(List.of("https://music-app.onrender.com")); // hoặc dùng "*" nếu test local
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));
