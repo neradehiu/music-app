@@ -28,44 +28,55 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS configuration
-                .csrf(csrf -> csrf.disable())  // Disable CSRF as you are using JWT
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()  // Allow public access to auth endpoints
-                        .requestMatchers("/api/songs/favorites", "/api/songs/{id}/favorite").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")  // Allow access for both USER and ADMIN
-                        .requestMatchers(HttpMethod.GET,  "/api/songs", "/api/songs/{id}", "/api/songs/{id}/play", "/api/songs/search", "/api/songs/genre/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.POST,  "/api/songs/upload").hasAuthority("ROLE_ADMIN")  // Only ADMIN can upload songs
-                        .requestMatchers(HttpMethod.PUT, "/api/songs/{id}").hasAuthority("ROLE_ADMIN")  // Only ADMIN can update songs
-                        .requestMatchers(HttpMethod.DELETE, "/api/songs/{id}").hasAuthority("ROLE_ADMIN")  // Only ADMIN can delete songs
-                        .anyRequest().authenticated()  // All other requests need to be authenticated
+                        // ✅ Allow access to static frontend files
+                        .requestMatchers(
+                                "/", "/index.html", "/favicon.ico",
+                                "/static/**", "/assets/**", "/css/**", "/js/**", "/images/**"
+                        ).permitAll()
+
+                        // ✅ Allow access to auth endpoints
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // ✅ Role-based access for song-related APIs
+                        .requestMatchers("/api/songs/favorites", "/api/songs/{id}/favorite").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/songs", "/api/songs/{id}", "/api/songs/{id}/play", "/api/songs/search", "/api/songs/genre/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/songs/upload").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/songs/{id}").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/songs/{id}").hasAuthority("ROLE_ADMIN")
+
+                        // ✅ All other requests must be authenticated
+                        .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Stateless session (JWT)
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);  // JWT filter
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();  // BCrypt password encoder
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();  // Authentication manager for authentication
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://music-app.onrender.com"));  // Allow frontend URL from Render
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));  // Allow all common HTTP methods
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));  // Allow headers needed for JWT and content type
-        configuration.setExposedHeaders(List.of("Authorization"));  // Expose Authorization header for frontend to get JWT
-        configuration.setAllowCredentials(true);  // Allow credentials (cookies, etc.)
+        configuration.setAllowedOrigins(List.of("https://music-app.onrender.com")); // hoặc "*"
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);  // Apply CORS configuration to all endpoints
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }
