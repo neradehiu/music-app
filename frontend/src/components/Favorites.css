@@ -1,0 +1,108 @@
+/* Container chính */
+.favorites-container {
+    width: 100%;
+    height: 100vh; /* Full chiều cao màn hình */
+    background-size: cover; /* Bao phủ toàn bộ khung */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 0px;
+    overflow: hidden; /* Ẩn thanh cuộn */
+    background-attachment: fixed; /* Giữ nền cố định khi cuộn */
+}
+
+/* Tiêu đề */
+.favorites-title {
+    font-size: 32px;
+    font-weight: bold;
+    padding: 15px 30px;
+    background: #2c1365;
+    color: white;
+    border-radius: 15px;
+    border: 4px solid white;
+    text-align: center;
+}
+
+/* Danh sách bài hát */
+.song-list {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    width: 500px;
+    border-radius: 15px;
+    margin-top: 20px;
+}
+
+.song-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    border-bottom: 2px solid white;
+    font-size: 18px;
+}
+
+.song-name {
+    flex: 1;
+    text-align: left;
+    color: white;
+}
+
+.icon-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.heart-icon {
+    font-size: 24px;
+    cursor: pointer;
+    transition: 0.3s;
+    color: white;
+}
+
+.heart-icon.liked {
+    color: red;
+    transform: scale(1.2);
+}
+
+.play-icon {
+    font-size: 24px;
+    color: white;
+}
+
+.home-buttonf {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    padding: 10px 20px;
+    background: linear-gradient(45deg,rgb(134, 213, 199),rgb(161, 10, 206));
+    border: none;
+    color: white;
+    border-radius: 25px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    align-items: center;
+    justify-content: center;
+    line-height: 20px;  
+}
+
+.home-buttonf:hover {
+    background: rgb(30, 97, 214);
+}
+
+
+/* Responsive */
+@media (max-width: 600px) {
+    .song-list {
+        width: 90%;
+    }
+
+    .favorites-title {
+        font-size: 24px;
+    }
+}
