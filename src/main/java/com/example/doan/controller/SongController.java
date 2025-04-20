@@ -16,7 +16,8 @@ import java.util.Optional;
 @CrossOrigin(origins = {
         "http://localhost:3000",   // React
         "http://localhost:8000",   // Flutter web chạy trên Chrome
-        "http://10.0.2.2:8000"     // Flutter chạy trên Android Emulator
+        "http://10.0.2.2:8000",     // Flutter chạy trên Android Emulator
+        "https://music-app.onrender.com" // Add Render URL here
 }, allowCredentials = "true")
 public class SongController {
     private final SongService songService;
