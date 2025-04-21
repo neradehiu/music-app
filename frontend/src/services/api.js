@@ -3,7 +3,7 @@ import axios from "axios";
 // ===============================
 // ==== CẤU HÌNH CHUNG ==========
 // ===============================
-const API_URL = "https://music-app.onrender.com/api"; // 👈 Dùng khi app đã deploy
+const API_URL = "https://music-app-b1ef.onrender.com/api"; // 👈 Dùng khi app đã deploy
 
 
 // Lấy token từ localStorage
