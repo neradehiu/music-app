@@ -17,10 +17,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = {
-        "http://localhost:3000",   // React
-        "http://localhost:8000",   // Flutter web chạy trên Chrome
         "http://10.0.2.2:8000",    // Flutter chạy trên Android Emulator
-        "https://music-app-b1ef.onrender.com" // Add Render URL here
+        "https://music-app-b1ef.onrender.com", // Add Render URL here
+        "https://music-app-1-f1ec.onrender.com"
 }, allowCredentials = "true")
 public class AuthController {
     private final UserRepository userRepository;
