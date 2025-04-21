@@ -20,4 +20,4 @@ FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
 
 
-EXPOSE https://music-app-1-f1ec.onrender.com
+EXPOSE 3000
