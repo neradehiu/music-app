@@ -17,7 +17,7 @@ import java.util.Optional;
         "http://localhost:3000",   // React
         "http://localhost:8000",   // Flutter web chạy trên Chrome
         "http://10.0.2.2:8000",     // Flutter chạy trên Android Emulator
-        "https://music-app.onrender.com" // Add Render URL here
+        "https://music-app-b1ef.onrender.com" // Add Render URL here
 }, allowCredentials = "true")
 public class SongController {
     private final SongService songService;
