@@ -7,9 +7,11 @@ import com.example.doan.model.User;
 import com.example.doan.repository.SongRepository;
 import com.example.doan.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -30,79 +32,72 @@ public class SongService {
     @Autowired
     private UserRepository userRepository;
 
-    // Upload file lên Cloudinary và lưu vào MySQL
+    /* ==================== UPLOAD ==================== */
     public Song uploadSong(MultipartFile file, String title, String artist, String genre) throws IOException {
-        // Upload file lên Cloudinary
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
-                ObjectUtils.asMap("resource_type", "auto"));  // "auto" giúp nhận diện đúng loại media
+                ObjectUtils.asMap("resource_type", "auto"));
 
         String cloudinaryUrl = (String) uploadResult.get("url");
 
-        // Tạo bài hát mới và thiết lập thông tin
         Song song = new Song();
         song.setTitle(title);
         song.setArtist(artist);
         song.setCloudinaryUrl(cloudinaryUrl);
-        song.setGenre(genre);  // Thiết lập thể loại cho bài hát
+        song.setGenre(genre);
+        song.setViewCount(0);   // Khởi tạo viewCount = 0
+        song.setShareCount(0);  // Khởi tạo shareCount = 0
 
-        // Lưu bài hát vào cơ sở dữ liệu
         return songRepository.save(song);
     }
 
-
-    // Lấy danh sách tất cả bài hát
+    /* ==================== CRUD / QUERY ==================== */
     public List<Song> getAllSongs() {
         return songRepository.findAll();
     }
 
-    // Lấy bài hát theo ID
     public Optional<Song> getSongById(Long id) {
         return songRepository.findById(id);
     }
 
-    // Tìm kiếm bài hát
     public List<Song> searchSongs(String query) {
         return songRepository.findByTitleContainingOrArtistContaining(query, query);
     }
 
-    //Thêm vào danh sách yêu thích
     public boolean addToFavorites(Long songId) {
         Optional<Song> song = songRepository.findById(songId);
         if (song.isPresent()) {
-            User user = getCurrentUser(); // Lấy người dùng hiện tại từ security context
-            user.getFavorites().add(song.get());
-            userRepository.save(user);
+            User user = getCurrentUser();
+            if (!user.getFavorites().contains(song.get())) {
+                user.getFavorites().add(song.get());
+                userRepository.save(user);
+            }
             return true;
         }
         return false;
     }
 
-    // Xóa khỏi yêu thích
     public boolean removeFromFavorites(Long songId) {
         Optional<Song> song = songRepository.findById(songId);
         if (song.isPresent()) {
             User user = getCurrentUser();
-            user.getFavorites().remove(song.get());
-            userRepository.save(user);
+            if (user.getFavorites().contains(song.get())) {
+                user.getFavorites().remove(song.get());
+                userRepository.save(user);
+            }
             return true;
         }
         return false;
     }
 
-    //Danh sách yêu thích
     public List<Song> getFavorites() {
-        User user = getCurrentUser(); // Lấy người dùng hiện tại từ security context
+        User user = getCurrentUser();
         return new ArrayList<>(user.getFavorites());
     }
 
-
-    // Danh sách theo THỂ LOẠI
     public List<Song> getSongsByGenre(String genre) {
-        return songRepository.findByGenre(genre); // Giả sử bạn có thuộc tính genre trong model Song
+        return songRepository.findByGenre(genre);
     }
 
-
-    // Cập nhật thông tin bài hát
     public Optional<Song> updateSong(Long id, Song songDetails) {
         Optional<Song> songOpt = songRepository.findById(id);
         if (songOpt.isPresent()) {
@@ -110,12 +105,12 @@ public class SongService {
             song.setTitle(songDetails.getTitle());
             song.setArtist(songDetails.getArtist());
             song.setCloudinaryUrl(songDetails.getCloudinaryUrl());
+            song.setGenre(songDetails.getGenre());
             return Optional.of(songRepository.save(song));
         }
         return Optional.empty();
     }
 
-    // Xóa bài hát theo ID
     public boolean deleteSong(Long id) {
         if (songRepository.existsById(id)) {
             songRepository.deleteById(id);
@@ -124,9 +119,44 @@ public class SongService {
         return false;
     }
 
-    // Lấy người dùng hiện tại từ SecurityContext
+    /* ==================== VIEW / SHARE / TOP ==================== */
+
+    /** Tăng viewCount lên +1 */
+    @Transactional
+    public boolean incrementView(Long songId) {
+        return songRepository.incrementView(songId) > 0;
+    }
+
+    /** Tăng shareCount lên +1 */
+    @Transactional
+    public boolean incrementShare(Long songId) {
+        return songRepository.incrementShare(songId) > 0;
+    }
+
+    /** Lấy Top N bài hát theo lượt xem giảm dần */
+    @Transactional(readOnly = true)
+    public List<Song> getTopSongs(int limit) {
+        return songRepository
+                .findAllByOrderByViewCountDesc(PageRequest.of(0, limit))
+                .getContent();
+    }
+
+    /** Lấy Top 10 bài hát theo lượt chia sẻ nhiều nhất */
+    @Transactional(readOnly = true)
+    public List<Song> getTopSharedSongs() {
+        return songRepository.findTop10ByOrderByShareCountDesc();
+    }
+
+    /* ==================== UTIL ==================== */
     private User getCurrentUser() {
-        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username;
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails) principal).getUsername();
+        } else {
+            username = principal.toString();
+        }
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

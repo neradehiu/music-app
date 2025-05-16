@@ -1,7 +1,7 @@
 package com.example.doan.model;
 
 import jakarta.persistence.*;
-        import lombok.*;
+import lombok.*;
 
 import java.util.List;
 
@@ -55,6 +55,28 @@ public class Song {
 
     public String getGenre() {
         return genre;
+    }
+
+    // ======= ➕ THÊM MỚI: viewCount và shareCount =======
+
+    private int viewCount = 0;
+
+    private int shareCount = 0;
+
+    public int getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(int viewCount) {
+        this.viewCount = viewCount;
+    }
+
+    public int getShareCount() {
+        return shareCount;
+    }
+
+    public void setShareCount(int shareCount) {
+        this.shareCount = shareCount;
     }
 
 }
