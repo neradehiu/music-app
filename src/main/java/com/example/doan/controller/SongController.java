@@ -176,13 +176,7 @@ public class SongController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<String> getShareableLink(@PathVariable Long id) {
         return songService.getSongById(id)
-                .map(song -> {
-                    String url = song.getCloudinaryUrl();
-                    if (!url.startsWith("http")) {
-                        url = "https://" + url;  // ⚠️ Chống lỗi thiếu https
-                    }
-                    return ResponseEntity.ok(url);
-                })
+                .map(song -> ResponseEntity.ok(song.getCloudinaryUrl())) // Trả về trực tiếp URL Cloudinary
                 .orElse(ResponseEntity.notFound().build());
     }
 }
