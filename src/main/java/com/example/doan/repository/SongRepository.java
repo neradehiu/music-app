@@ -45,4 +45,5 @@ public interface SongRepository extends JpaRepository<Song, Long> {
 
     /* ----- PAGING BY VIEW (service dùng để lấy top N) ----- */
     Page<Song> findAllByOrderByViewCountDesc(Pageable pageable);
+
 }
