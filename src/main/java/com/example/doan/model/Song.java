@@ -9,6 +9,7 @@ import java.util.List;
 @Table(name = "songs")
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Song {
@@ -62,6 +63,17 @@ public class Song {
     private int viewCount = 0;
 
     private int shareCount = 0;
+
+    private int likeCount = 0;
+
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
+
 
     public int getViewCount() {
         return viewCount;

@@ -13,11 +13,13 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/songs")
-@CrossOrigin(origins = {
-        "http://10.0.2.2:8000",
-        "https://music-app-b1ef.onrender.com",
-        "https://music-app-1-f1ec.onrender.com"
-}, allowCredentials = "true")
+@CrossOrigin(
+        origins = {
+                "http://10.0.2.2:8000",
+                "https://music-app-b1ef.onrender.com",
+                "https://music-app-1-f1ec.onrender.com"
+        },
+        allowCredentials = "true")
 public class SongController {
 
     private final SongService songService;
@@ -26,68 +28,70 @@ public class SongController {
         this.songService = songService;
     }
 
-    // ✅ Lấy danh sách nhạc
+    /* ---------- CRUD / QUERY CƠ BẢN ---------- */
+
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public List<Song> getAllSongs() {
         return songService.getAllSongs();
     }
 
-    // ✅ Phát một bài nhạc
     @GetMapping("/{id}/play")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<String> playSong(@PathVariable Long id) {
-        Optional<Song> songOpt = songService.getSongById(id);
-        return songOpt.map(song -> ResponseEntity.ok(song.getCloudinaryUrl()))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return songService.getSongById(id)
+                .map(s -> ResponseEntity.ok(s.getCloudinaryUrl()))
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ Lấy thông tin 1 bài nhạc
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<Song> getSongById(@PathVariable Long id) {
-        Optional<Song> song = songService.getSongById(id);
-        return song.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return songService.getSongById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ Tìm kiếm bài hát
     @GetMapping("/search")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public List<Song> searchSongs(@RequestParam String query) {
         return songService.searchSongs(query);
     }
 
-    // ✅ Thêm vào danh sách yêu thích
+    /* ---------- FAVORITE ---------- */
+
     @PostMapping("/{id}/favorite")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<String> addToFavorites(@PathVariable Long id) {
-        boolean success = songService.addToFavorites(id);
-        return success ? ResponseEntity.ok("Song added to favorites") : ResponseEntity.notFound().build();
+        return songService.addToFavorites(id)
+                ? ResponseEntity.ok("Song added to favorites")
+                : ResponseEntity.notFound().build();
     }
 
-    // ✅ Xóa khỏi yêu thích
     @DeleteMapping("/{id}/favorite")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<String> removeFromFavorites(@PathVariable Long id) {
-        boolean success = songService.removeFromFavorites(id);
-        return success ? ResponseEntity.ok("Song removed from favorites") : ResponseEntity.notFound().build();
+        return songService.removeFromFavorites(id)
+                ? ResponseEntity.ok("Song removed from favorites")
+                : ResponseEntity.notFound().build();
     }
 
-    // ✅ Danh sách yêu thích
     @GetMapping("/favorites")
     @PreAuthorize("hasRole('ROLE_USER')")
     public List<Song> getFavorites() {
         return songService.getFavorites();
     }
 
-    // ✅ Danh sách bài hát theo thể loại
+    /* ---------- GENRE ---------- */
+
     @GetMapping("/genre/{genre}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public List<Song> getSongsByGenre(@PathVariable String genre) {
         return songService.getSongsByGenre(genre);
     }
 
-    // ✅ Upload bài hát
+    /* ---------- UPLOAD ---------- */
+
     @PostMapping("/upload")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Song> uploadSong(
@@ -95,24 +99,24 @@ public class SongController {
             @RequestParam("title") String title,
             @RequestParam("artist") String artist,
             @RequestParam("genre") String genre) {
+
         try {
-            Song song = songService.uploadSong(file, title, artist, genre);
-            return ResponseEntity.ok(song);
+            return ResponseEntity.ok(songService.uploadSong(file, title, artist, genre));
         } catch (IOException e) {
             return ResponseEntity.status(500).body(null);
         }
     }
 
-    // ✅ Sửa bài hát
+    /* ---------- UPDATE / DELETE ---------- */
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Song> updateSong(@PathVariable Long id, @RequestBody Song song) {
         return songService.updateSong(id, song)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ Xoá bài hát
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteSong(@PathVariable Long id) {
@@ -121,7 +125,8 @@ public class SongController {
                 : ResponseEntity.notFound().build();
     }
 
-    // ✅ Tăng lượt xem
+    /* ---------- COUNTERS: VIEW / SHARE / LIKE ---------- */
+
     @PutMapping("/{id}/view")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<Void> incrementView(@PathVariable Long id) {
@@ -130,7 +135,6 @@ public class SongController {
                 : ResponseEntity.notFound().build();
     }
 
-    // ✅ Tăng lượt chia sẻ
     @PutMapping("/{id}/share")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<Void> incrementShare(@PathVariable Long id) {
@@ -139,10 +143,46 @@ public class SongController {
                 : ResponseEntity.notFound().build();
     }
 
-    // ✅ Lấy danh sách top bài hát (theo lượt xem)
+    @PutMapping("/{id}/like")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    public ResponseEntity<Void> incrementLike(@PathVariable Long id) {
+        return songService.incrementLike(id)
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
+    }
+
+    /* ---------- TOP LISTS ---------- */
+
     @GetMapping("/top")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public List<Song> getTopSongs(@RequestParam(defaultValue = "10") int limit) {
         return songService.getTopSongs(limit);
+    }
+
+    @GetMapping("/top-liked")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    public List<Song> getTopLikedSongs(@RequestParam(defaultValue = "10") int limit) {
+        return songService.getTopLikedSongs(limit);
+    }
+
+    @GetMapping("/top-shared")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    public List<Song> getTopSharedSongs(@RequestParam(defaultValue = "10") int limit) {
+        return songService.getTopSharedSongs(limit);
+    }
+
+    // ✅ Lấy link chia sẻ bài hát
+    @GetMapping("/{id}/share-link")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    public ResponseEntity<String> getShareableLink(@PathVariable Long id) {
+        return songService.getSongById(id)
+                .map(song -> {
+                    String url = song.getCloudinaryUrl();
+                    if (!url.startsWith("http")) {
+                        url = "https://" + url;  // ⚠️ Chống lỗi thiếu https
+                    }
+                    return ResponseEntity.ok(url);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
