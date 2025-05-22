@@ -145,10 +145,12 @@ public class SongController {
 
     @PutMapping("/{id}/like")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    public ResponseEntity<Void> incrementLike(@PathVariable Long id) {
-        return songService.incrementLike(id)
-                ? ResponseEntity.ok().build()
-                : ResponseEntity.notFound().build();
+    public ResponseEntity<String> toggleLike(@PathVariable Long id) {
+        return songService.toggleLike(id)
+                .map(liked -> liked
+                        ? ResponseEntity.ok("Liked ✅")      // vừa like
+                        : ResponseEntity.ok("Unliked ❌"))   // vừa bỏ like
+                .orElse(ResponseEntity.notFound().build());
     }
 
     /* ---------- TOP LISTS ---------- */

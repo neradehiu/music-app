@@ -26,6 +26,19 @@ public class Song {
     @ManyToMany(mappedBy = "favorites")
     private List<User> users;  // Liên kết với bảng User qua mối quan hệ many-to-many
 
+    // ➕ Danh sách người dùng đã like bài hát này
+    @ManyToMany(mappedBy = "likedSongs")
+    private List<User> usersLiked;
+
+    public List<User> getUsersLiked() {
+        return usersLiked;
+    }
+
+    public void setUsersLiked(List<User> usersLiked) {
+        this.usersLiked = usersLiked;
+    }
+
+
     public void setTitle(String title) {
         this.title = title;
     }

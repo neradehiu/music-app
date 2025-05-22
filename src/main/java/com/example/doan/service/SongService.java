@@ -49,13 +49,9 @@ public class SongService {
     }
 
     /* ==================== CRUD / QUERY ==================== */
-    public List<Song> getAllSongs() {
-        return songRepository.findAll();
-    }
+    public List<Song> getAllSongs() { return songRepository.findAll(); }
 
-    public Optional<Song> getSongById(Long id) {
-        return songRepository.findById(id);
-    }
+    public Optional<Song> getSongById(Long id) { return songRepository.findById(id); }
 
     public List<Song> searchSongs(String query) {
         return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(query, query);
@@ -65,9 +61,7 @@ public class SongService {
     public boolean addToFavorites(Long songId) {
         return songRepository.findById(songId).map(song -> {
             User user = getCurrentUser();
-            if (user.getFavorites().add(song)) {
-                userRepository.save(user);
-            }
+            if (user.getFavorites().add(song)) { userRepository.save(user); }
             return true;
         }).orElse(false);
     }
@@ -75,9 +69,7 @@ public class SongService {
     public boolean removeFromFavorites(Long songId) {
         return songRepository.findById(songId).map(song -> {
             User user = getCurrentUser();
-            if (user.getFavorites().remove(song)) {
-                userRepository.save(user);
-            }
+            if (user.getFavorites().remove(song)) { userRepository.save(user); }
             return true;
         }).orElse(false);
     }
@@ -87,11 +79,9 @@ public class SongService {
     }
 
     /* ==================== GENRE ==================== */
-    public List<Song> getSongsByGenre(String genre) {
-        return songRepository.findByGenre(genre);
-    }
+    public List<Song> getSongsByGenre(String genre) { return songRepository.findByGenre(genre); }
 
-    /* ==================== UPDATE ==================== */
+    /* ==================== UPDATE / DELETE ==================== */
     public Optional<Song> updateSong(Long id, Song details) {
         return songRepository.findById(id).map(song -> {
             song.setTitle(details.getTitle());
@@ -103,51 +93,56 @@ public class SongService {
     }
 
     public boolean deleteSong(Long id) {
-        if (songRepository.existsById(id)) {
-            songRepository.deleteById(id);
-            return true;
-        }
+        if (songRepository.existsById(id)) { songRepository.deleteById(id); return true; }
         return false;
     }
 
     /* ==================== COUNTERS ==================== */
+    @Transactional public boolean incrementView(Long songId)  { return songRepository.incrementView(songId)  > 0; }
+    @Transactional public boolean incrementShare(Long songId) { return songRepository.incrementShare(songId) > 0; }
 
+    /* ---------- Toggle Like ---------- */
     @Transactional
-    public boolean incrementView(Long songId) {
-        return songRepository.incrementView(songId) > 0;
+    public Optional<Boolean> toggleLike(Long songId) {
+        return songRepository.findById(songId).map(song -> {
+            User user = getCurrentUser();
+            boolean likedNow;
+
+            if (user.getLikedSongs().contains(song)) {          // UNLIKE
+                user.getLikedSongs().remove(song);
+                song.setLikeCount(song.getLikeCount() - 1);
+                likedNow = false;
+            } else {                                            // LIKE
+                user.getLikedSongs().add(song);
+                song.setLikeCount(song.getLikeCount() + 1);
+                likedNow = true;
+            }
+            userRepository.save(user);
+            songRepository.save(song);
+            return likedNow;
+        });
     }
 
-    @Transactional
-    public boolean incrementShare(Long songId) {
-        return songRepository.incrementShare(songId) > 0;
-    }
-
+    /* Giữ method cũ để Controller gọi */
     @Transactional
     public boolean incrementLike(Long songId) {
-        return songRepository.incrementLike(songId) > 0;
+        return toggleLike(songId).isPresent();  // true nếu tồn tại bài hát
     }
 
     /* ==================== TOP LISTS ==================== */
-
     @Transactional(readOnly = true)
     public List<Song> getTopSongs(int limit) {
-        return songRepository
-                .findAllByOrderByViewCountDesc(PageRequest.of(0, limit))
-                .getContent();
+        return songRepository.findAllByOrderByViewCountDesc(PageRequest.of(0, limit)).getContent();
     }
 
     @Transactional(readOnly = true)
     public List<Song> getTopLikedSongs(int limit) {
-        return songRepository
-                .findAll(PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "likeCount")))
-                .getContent();
+        return songRepository.findAll(PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "likeCount"))).getContent();
     }
 
     @Transactional(readOnly = true)
     public List<Song> getTopSharedSongs(int limit) {
-        return songRepository
-                .findAll(PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "shareCount")))
-                .getContent();
+        return songRepository.findAll(PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "shareCount"))).getContent();
     }
 
     /* ==================== UTIL ==================== */
@@ -158,5 +153,8 @@ public class SongService {
                 : principal.toString();
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+    public Song findSongByTitleIgnoreCase(String title) {
+        return songRepository.findByTitleIgnoreCase(title);
     }
 }

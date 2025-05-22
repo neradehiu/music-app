@@ -31,8 +31,26 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "song_id")
     )
+
     @JsonIgnore
     private List<Song> favorites;  // Liên kết bài hát yêu thích của người dùng
+    // ➕ Thêm danh sách bài hát đã like
+    @ManyToMany
+    @JoinTable(
+            name = "likes",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "song_id")
+    )
+    @JsonIgnore
+    private List<Song> likedSongs;
+
+    public List<Song> getLikedSongs() {
+        return likedSongs;
+    }
+
+    public void setLikedSongs(List<Song> likedSongs) {
+        this.likedSongs = likedSongs;
+    }
 
 
     public User() {}
