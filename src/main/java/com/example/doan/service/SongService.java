@@ -154,7 +154,4 @@ public class SongService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
-    public Song findSongByTitleIgnoreCase(String title) {
-        return songRepository.findByTitleIgnoreCase(title);
-    }
 }
