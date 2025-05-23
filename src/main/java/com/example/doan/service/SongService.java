@@ -53,8 +53,15 @@ public class SongService {
 
     public Optional<Song> getSongById(Long id) { return songRepository.findById(id); }
 
+    
+    /* ==================== FAVORITES ==================== */
+
     public List<Song> searchSongs(String query) {
         return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(query, query);
+    }
+
+    public List<Song> searchByTitleOrArtist(String q) {
+        return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(q, q);
     }
 
     /* ==================== FAVORITES ==================== */
