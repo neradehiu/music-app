@@ -13,10 +13,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +61,7 @@ public class SongService {
     public Optional<Song> getSongById(Long id) { return songRepository.findById(id); }
 
     
-    /* ==================== FAVORITES ==================== */
+    /* ==================== SEARCH ==================== */
 
     public List<Song> searchSongs(String query) {
         return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(query, query);
