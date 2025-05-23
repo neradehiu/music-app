@@ -52,10 +52,18 @@ public class SongController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /* ---------- SEARCH ---------- */
+        
     @GetMapping("/search")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public List<Song> searchSongs(@RequestParam String query) {
         return songService.searchSongs(query);
+    }
+
+	@GetMapping("/search/voice")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    public List<Song> searchByVoice(@RequestParam String q) {
+        return songService.searchByTitleOrArtist(q);
     }
 
     /* ---------- FAVORITE ---------- */

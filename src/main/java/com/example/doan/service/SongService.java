@@ -13,10 +13,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,11 @@ public class SongService {
     private final Cloudinary cloudinary;
     private final SongRepository songRepository;
     private final UserRepository userRepository;
+    private final RestTemplate restTemplate;
+    
+    @Value("${nlp.service.url}")
+    private String nlpUrl;
+
 
     /* ==================== UPLOAD ==================== */
     public Song uploadSong(MultipartFile file,
@@ -53,9 +60,38 @@ public class SongService {
 
     public Optional<Song> getSongById(Long id) { return songRepository.findById(id); }
 
+    
+    /* ==================== SEARCH ==================== */
+
     public List<Song> searchSongs(String query) {
         return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(query, query);
     }
+
+    public List<Song> searchByTitleOrArtist(String q) {
+        Map<String, String> req = Map.of("text", q);
+        Map<?, ?> res = null;
+    
+        try {
+            res = restTemplate.postForObject(nlpUrl + "/nlp/clean", req, Map.class);
+        } catch (Exception e) {
+            // Log lỗi hoặc xử lý khác
+            // fallback: tìm kiếm bằng query gốc
+            return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(q, q);
+        }
+    
+        if (res == null || !res.containsKey("tokens")) {
+            return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(q, q);
+        }
+    
+        @SuppressWarnings("unchecked")
+        List<String> tokens = (List<String>) res.get("tokens");
+        String processed = String.join(" ", tokens);
+    
+        return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(processed, processed);
+    }
+
+
+
 
     /* ==================== FAVORITES ==================== */
     public boolean addToFavorites(Long songId) {
