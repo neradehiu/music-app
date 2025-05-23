@@ -67,18 +67,30 @@ public class SongService {
         return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(query, query);
     }
 
-   public List<Song> searchByTitleOrArtist(String q) {
-        // Gọi NLP để làm sạch
+    public List<Song> searchByTitleOrArtist(String q) {
         Map<String, String> req = Map.of("text", q);
-        Map<?, ?> res = restTemplate.postForObject(nlpUrl + "/nlp/clean", req, Map.class);
+        Map<?, ?> res = null;
+    
+        try {
+            res = restTemplate.postForObject(nlpUrl + "/nlp/clean", req, Map.class);
+        } catch (Exception e) {
+            // Log lỗi hoặc xử lý khác
+            // fallback: tìm kiếm bằng query gốc
+            return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(q, q);
+        }
+    
+        if (res == null || !res.containsKey("tokens")) {
+            return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(q, q);
+        }
     
         @SuppressWarnings("unchecked")
         List<String> tokens = (List<String>) res.get("tokens");
-    
         String processed = String.join(" ", tokens);
     
         return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(processed, processed);
     }
+
+
 
 
     /* ==================== FAVORITES ==================== */
