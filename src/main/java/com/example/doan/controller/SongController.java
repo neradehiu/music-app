@@ -181,4 +181,16 @@ public class SongController {
                 .map(song -> ResponseEntity.ok(song.getCloudinaryUrl())) // Trả về trực tiếp URL Cloudinary
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/{id}/share-count")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    public ResponseEntity<Integer> getShareCount(@PathVariable Long id) {
+        Optional<Song> songOpt = songService.getSongById(id);
+        if (songOpt.isPresent()) {
+            Integer shareCount = songOpt.get().getShareCount();  // giả sử trường shareCount trong entity Song
+            return ResponseEntity.ok(shareCount);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
