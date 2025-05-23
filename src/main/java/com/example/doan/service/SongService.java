@@ -25,6 +25,15 @@ public class SongService {
     private final Cloudinary cloudinary;
     private final SongRepository songRepository;
     private final UserRepository userRepository;
+    private final RestTemplate restTemplate;
+    
+    @Value("${nlp.service.url}")
+    private String nlpUrl;
+
+    public SongService(SongRepository songRepository, RestTemplate restTemplate) {
+        this.songRepository = songRepository;
+        this.restTemplate = restTemplate;
+    }
 
     /* ==================== UPLOAD ==================== */
     public Song uploadSong(MultipartFile file,
@@ -60,9 +69,19 @@ public class SongService {
         return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(query, query);
     }
 
-    public List<Song> searchByTitleOrArtist(String q) {
-        return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(q, q);
+   public List<Song> searchByTitleOrArtist(String q) {
+        // Gọi NLP để làm sạch
+        Map<String, String> req = Map.of("text", q);
+        Map<?, ?> res = restTemplate.postForObject(nlpUrl + "/nlp/clean", req, Map.class);
+    
+        @SuppressWarnings("unchecked")
+        List<String> tokens = (List<String>) res.get("tokens");
+    
+        String processed = String.join(" ", tokens);
+    
+        return songRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(processed, processed);
     }
+
 
     /* ==================== FAVORITES ==================== */
     public boolean addToFavorites(Long songId) {
