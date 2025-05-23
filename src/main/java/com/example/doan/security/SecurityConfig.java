@@ -45,7 +45,7 @@ public class SecurityConfig {
 
                         // ✅ Song-related APIs
                         .requestMatchers("/api/songs/favorites", "/api/songs/{id}/favorite").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/songs", "/api/songs/{id}", "/api/songs/{id}/play", "/api/songs/search", "/api/songs/{id}/share-link", "/api/songs/genre/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/songs", "/api/songs/{id}", "/api/songs/{id}/play", "/api/songs/search", "api/songs/search/voice", "/api/songs/{id}/share-link", "/api/songs/genre/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/songs/upload").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/songs/{id}").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/songs/{id}").hasAuthority("ROLE_ADMIN")
