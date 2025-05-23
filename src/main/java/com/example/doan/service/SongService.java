@@ -30,10 +30,6 @@ public class SongService {
     @Value("${nlp.service.url}")
     private String nlpUrl;
 
-    public SongService(SongRepository songRepository, RestTemplate restTemplate) {
-        this.songRepository = songRepository;
-        this.restTemplate = restTemplate;
-    }
 
     /* ==================== UPLOAD ==================== */
     public Song uploadSong(MultipartFile file,
