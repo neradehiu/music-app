@@ -19,7 +19,8 @@ import java.util.Optional;
 @CrossOrigin(origins = {
         "http://10.0.2.2:8000",    // Flutter chạy trên Android Emulator
         "https://music-app-b1ef.onrender.com", // Add Render URL here
-        "https://music-app-1-f1ec.onrender.com"
+        "https://music-app-1-f1ec.onrender.com",
+        "https://aisearchbyvoice.onrender.com"
 }, allowCredentials = "true")
 public class AuthController {
     private final UserRepository userRepository;
