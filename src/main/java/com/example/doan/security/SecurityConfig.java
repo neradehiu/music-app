@@ -72,7 +72,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://music-app-1-f1ec.onrender.com", "http://10.0.2.2:8080", "https://maf-h4r6.onrender.com", "https://aisearchbyvoice.onrender.com", "https://music-app-10.onrender.com" ,"https://hiu-g5j6.onrender.com")); // hoặc dùng "*" nếu test local
+        configuration.setAllowedOrigins(List.of("https://music-app-1-f1ec.onrender.com", "http://10.0.2.2:8080", "https://maf-h4r6.onrender.com", "https://aisearchbyvoice.onrender.com", "https://music-app-10.onrender.com" ,"https://hiu-g5j6.onrender.com", "http://localhost:8080")); 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));
