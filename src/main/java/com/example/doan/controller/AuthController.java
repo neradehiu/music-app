@@ -21,7 +21,8 @@ import java.util.Optional;
         "https://music-app-b1ef.onrender.com", // Add Render URL here
         "https://music-app-1-f1ec.onrender.com",
         "https://aisearchbyvoice.onrender.com",
-        "https://maf-h4r6.onrender.com"
+        "https://maf-h4r6.onrender.com",
+        "https://music-app-10.onrender.com"
 }, allowCredentials = "true")
 public class AuthController {
     private final UserRepository userRepository;
