@@ -17,8 +17,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = {
-        "http://10.0.2.2:8000",    // Flutter chạy trên Android Emulator
-        "https://music-app-b1ef.onrender.com", // Add Render URL here
+        "http://10.0.2.2:8000", 
+        "http://localhost:8080",
+        "https://music-app-b1ef.onrender.com", 
         "https://music-app-1-f1ec.onrender.com",
         "https://aisearchbyvoice.onrender.com",
         "https://maf-h4r6.onrender.com",
