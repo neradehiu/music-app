@@ -17,7 +17,9 @@ import java.util.Optional;
         origins = {
                 "http://10.0.2.2:8000",
                 "https://music-app-b1ef.onrender.com",
-                "https://music-app-1-f1ec.onrender.com"
+                "https://music-app-1-f1ec.onrender.com",
+		"https://aisearchbyvoice.onrender.com",
+        	"https://maf-h4r6.onrender.com"
         },
         allowCredentials = "true")
 public class SongController {
