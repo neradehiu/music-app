@@ -23,6 +23,7 @@ import java.util.Optional;
         "https://aisearchbyvoice.onrender.com",
         "https://maf-h4r6.onrender.com",
         "https://music-app-10.onrender.com"
+        "https://hiu-g5j6.onrender.com"
 }, allowCredentials = "true")
 public class AuthController {
     private final UserRepository userRepository;
