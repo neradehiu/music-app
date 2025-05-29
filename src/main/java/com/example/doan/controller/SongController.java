@@ -16,6 +16,7 @@ import java.util.Optional;
 @CrossOrigin(
         origins = {
                 "http://10.0.2.2:8000",
+		"http://localhost:8080",
                 "https://music-app-b1ef.onrender.com",
                 "https://music-app-1-f1ec.onrender.com",
 		"https://aisearchbyvoice.onrender.com",
